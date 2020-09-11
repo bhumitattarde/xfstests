@@ -4573,6 +4573,11 @@ _getcap()
 	return ${PIPESTATUS[0]}
 }
 
+_require_localhost()
+{
+	ping -q -W 1 -c 1 localhost >& /dev/null || _notrun "localhost not reachable"
+}
+
 init_rc
 
 ################################################################################
