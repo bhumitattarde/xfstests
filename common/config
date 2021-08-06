@@ -305,6 +305,9 @@ _mount_opts()
 	9p)
 		export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
 		;;
+	fuse)
+		export MOUNT_OPTIONS=$FUSE_MOUNT_OPTIONS
+		;;
 	xfs)
 		export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
 		;;
@@ -362,6 +365,9 @@ _test_mount_opts()
 	case $FSTYP in
 	9p)
 		export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
+		;;
+	fuse)
+		export TEST_FS_MOUNT_OPTS=$FUSE_MOUNT_OPTIONS
 		;;
 	cifs)
 		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
@@ -501,8 +507,8 @@ _check_device()
 	fi
 
 	case "$FSTYP" in
-	9p|tmpfs|virtiofs)
-		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
+	9p|fuse|tmpfs|virtiofs)
+		# 9p, fuse and virtiofs mount tags are just plain strings, so anything is allowed
 		# tmpfs doesn't use mount source, ignore
 		;;
 	overlay)

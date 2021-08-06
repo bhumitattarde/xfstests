@@ -253,7 +253,7 @@ _getfattr()
 
 # set maximum total attr space based on fs type
 case "$FSTYP" in
-xfs|udf|pvfs2|9p|ceph|nfs)
+xfs|udf|pvfs2|9p|ceph|nfs|fuse)
 	MAX_ATTRS=1000
 	;;
 ext2|ext3|ext4)
@@ -312,7 +312,7 @@ xfs|udf|btrfs)
 pvfs2)
 	MAX_ATTRVAL_SIZE=8192
 	;;
-9p|ceph|nfs)
+9p|ceph|nfs|fuse)
 	MAX_ATTRVAL_SIZE=65536
 	;;
 bcachefs)

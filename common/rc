@@ -127,6 +127,8 @@ case "$FSTYP" in
 	 ;;
     9p)
 	 ;;
+    fuse)
+	 ;;
     ceph)
 	 . ./common/ceph
 	 ;;
@@ -333,7 +335,7 @@ _try_scratch_mount()
 		_overlay_scratch_mount $*
 		return $?
 	fi
-	_mount -t $FSTYP `_scratch_mount_options $*`
+	_mount -t $FSTYP$FUSE_SUBTYP `_scratch_mount_options $*`
 }
 
 # mount scratch device with given options and _fail if mount fails
@@ -643,6 +645,9 @@ _test_mkfs()
     9p)
 	# do nothing for 9p
 	;;
+    fuse)
+    	# do nothing for fuse
+    	;;
     virtiofs)
 	# do nothing for virtiofs
 	;;
@@ -683,6 +688,9 @@ _mkfs_dev()
     9p)
 	# do nothing for 9p
 	;;
+    fuse)
+    	# do nothing for fuse
+    	;;
     virtiofs)
 	# do nothing for virtiofs
 	;;
@@ -750,7 +758,7 @@ _scratch_mkfs()
 	local mkfs_status
 
 	case $FSTYP in
-	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
+	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|fuse|virtiofs)
 		# unable to re-create this fstyp, just remove all files in
 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
 		# created in previous runs
@@ -1271,7 +1279,7 @@ _df_device()
 
     # Note that we use "==" here so awk doesn't try to interpret an NFS over
     # IPv6 server as a regular expression.
-    $DF_PROG 2>/dev/null | $AWK_PROG -v what=$1 '
+    $DF_PROG -a 2>/dev/null | $AWK_PROG -v what=$1 '
         ($1==what) && (NF==1) {
             v=$1
             getline
@@ -1514,14 +1522,15 @@ _check_mounted_on()
 	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
 
 	# if it's mounted, make sure its on $mnt
-	if [ "$mount_rec" != "$dev $mnt" ]; then
+	# This check doesn't apply to FUSE since both mounts have the same device
+	if [[ "$FSTYP" != "fuse" && "$mount_rec" != "$dev $mnt" ]]; then
 		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
 		echo "Already mounted result:"
 		echo $mount_rec
 		return 2 # 2 = mounted on wrong mnt
 	fi
 
-	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+	if [ -n "$type" -a "`_fs_type $dev`" != "$type$FUSE_SUBTYP" ]; then
 		echo "$devname=$dev is mounted but not a type $type filesystem"
 		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
 		_df_device $dev
@@ -1545,7 +1554,7 @@ _require_scratch_nocheck()
 			_notrun "this test requires a valid \$SCRATCH_MNT"
 		fi
 		;;
-	9p|virtiofs)
+	9p|fuse|virtiofs)
 		if [ -z "$SCRATCH_DEV" ]; then
 			_notrun "this test requires a valid \$SCRATCH_DEV"
 		fi
@@ -1701,7 +1710,7 @@ _require_test()
 			_notrun "this test requires a valid \$TEST_DIR"
 		fi
 		;;
-	9p|virtiofs)
+	9p|fuse|virtiofs)
 		if [ -z "$TEST_DEV" ]; then
 			_notrun "this test requires a valid \$TEST_DEV"
 		fi
@@ -2863,7 +2872,7 @@ _mount_or_remount_rw()
 
 	if [ $USE_REMOUNT -eq 0 ]; then
 		if [ "$FSTYP" != "overlay" ]; then
-			_mount -t $FSTYP $mount_opts $device $mountpoint
+			_mount -t $FSTYP$FUSE_SUBTYP $mount_opts $device $mountpoint
 		else
 			_overlay_mount $device $mountpoint
 		fi
@@ -3000,6 +3009,9 @@ _check_test_fs()
     9p)
 	# no way to check consistency for 9p
 	;;
+    fuse)
+    	# no way to check consistency for fuse
+    	;;
     virtiofs)
 	# no way to check consistency for virtiofs
 	;;
@@ -3061,6 +3073,9 @@ _check_scratch_fs()
     9p)
 	# no way to check consistency for 9p
 	;;
+    fuse)
+    	# no way to check consistency for fuse
+    	;;
     virtiofs)
 	# no way to check consistency for virtiofs
 	;;

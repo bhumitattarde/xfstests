@@ -59,6 +59,7 @@ check options
     -glusterfs		test GlusterFS
     -cifs		test CIFS
     -9p			test 9p
+    -fuse		test fuse
     -virtiofs		test virtiofs
     -overlay		test overlay
     -pvfs2		test PVFS2
@@ -281,6 +282,7 @@ while [ $# -gt 0 ]; do
 	-glusterfs)	FSTYP=glusterfs ;;
 	-cifs)		FSTYP=cifs ;;
 	-9p)		FSTYP=9p ;;
+	-fuse)		FSTYP=fuse ;;
 	-virtiofs)	FSTYP=virtiofs ;;
 	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
 	-pvfs2)		FSTYP=pvfs2 ;;
